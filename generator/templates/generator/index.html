@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Password Generator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTMX for fetching passwords without page reloads -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Alpine.js for fluid animations and state -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen flex items-center justify-center p-4 antialiased">
+
+    <!-- Main Card Container -->
+    <main class="w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden" x-data="{ copied: false, length: 16 }">
+        
+        <!-- Header -->
+        <header class="bg-slate-800/50 p-6 border-b border-slate-700">
+            <h1 class="text-xl font-semibold text-white tracking-wide">Generator</h1>
+        </header>
+
+        <div class="p-6 space-y-8">
+            
+            <!-- Password Display Area -->
+            <div class="relative bg-slate-950 p-4 rounded-xl flex items-center justify-between group border border-slate-800">
+                <!-- HTMX injects the password into this span -->
+                <span id="pw-text" class="text-2xl font-mono text-emerald-400 break-all select-all mr-4" x-ref="pwText"></span>
+                
+                <!-- Alpine.js handles the copy animation -->
+                <button 
+                    @click="navigator.clipboard.writeText($refs.pwText.innerText); copied = true; setTimeout(() => copied = false, 2000)"
+                    class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors text-slate-400 hover:text-white"
+                    title="Copy to clipboard"
+                >
+                    <svg x-show="!copied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    <svg x-show="copied" x-transition.opacity class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Configuration Form -->
+            <!-- hx-trigger="change, load" fetches a password instantly on load and whenever an input changes -->
+            <form hx-get="/generate/" hx-target="#pw-text" hx-trigger="change, load" class="space-y-6">
+                
+                <!-- Length Slider -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-medium text-slate-400">Password Length</label>
+                        <span class="text-lg font-semibold text-white" x-text="length"></span>
+                    </div>
+                    <input 
+                        type="range" 
+                        name="length" 
+                        min="4" 
+                        max="64" 
+                        x-model="length"
+                        class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                    >
+                </div>
+
+                <!-- Customisation Checkboxes -->
+                <div class="space-y-3">
+                    <label class="flex items-center space-x-3 cursor-pointer group">
+                        <input type="checkbox" name="uppercase" value="true" checked class="w-5 h-5 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-800">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">Include Uppercase (A-Z)</span>
+                    </label>
+
+                    <label class="flex items-center space-x-3 cursor-pointer group">
+                        <input type="checkbox" name="lowercase" value="true" checked class="w-5 h-5 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-800">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">Include Lowercase (a-z)</span>
+                    </label>
+
+                    <label class="flex items-center space-x-3 cursor-pointer group">
+                        <input type="checkbox" name="numbers" value="true" checked class="w-5 h-5 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-800">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">Include Numbers (0-9)</span>
+                    </label>
+
+                    <label class="flex items-center space-x-3 cursor-pointer group">
+                        <input type="checkbox" name="symbols" value="true" checked class="w-5 h-5 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-800">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">Include Symbols (&*#)</span>
+                    </label>
+
+                    <label class="flex items-center space-x-3 cursor-pointer group pt-2 border-t border-slate-700">
+                        <input type="checkbox" name="exclude_ambiguous" value="true" class="w-5 h-5 rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-800">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">Exclude Ambiguous (O, 0, l, 1)</span>
+                    </label>
+                </div>
+            </form>
+            
+        </div>
+    </main>
+
+</body>
+</html>
